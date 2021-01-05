@@ -1,4 +1,4 @@
-var initialized = false;
+var interceptClicks;
 var player;
 var overlay;
 
@@ -81,9 +81,9 @@ function startLoading() {
 }
 
 document.addEventListener('click', function (event) {
-    if (!initialized) {
-        initialized = true;
-        
+    if (interceptClicks) {
+        interceptClicks = false;
+
         startLoading();
     }
 });
@@ -120,8 +120,11 @@ window.onYouTubeIframeAPIReady = function() {
             overlay.hide();
 
             // TODO: improve guidance, explain what this app does
+
             overlay = new PlainOverlay({ face: document.getElementById("message"), style: { cursor: "pointer" } });
-            overlay.show();    
+            overlay.show();
+
+            interceptClicks = true;
         });
     });
 }
