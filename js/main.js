@@ -46,6 +46,8 @@ function loadAllVideos(playlistId, pageToken, allVideos) {
         allVideos = [];
     }
 
+    // TODO: exclude rated videos - https://developers.google.com/youtube/v3/docs/videos/list?authuser=0
+
     return gapi.client.youtube.playlistItems.list({
         "part": [
             "snippet"
@@ -90,6 +92,8 @@ function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.CUED) {
         overlay.hide();
     }
+
+    // TODO: ask to rate at the end of a video
 }
 
 window.onYouTubeIframeAPIReady = function() {
@@ -115,6 +119,7 @@ window.onYouTubeIframeAPIReady = function() {
         }, function (err) {
             overlay.hide();
 
+            // TODO: improve guidance, explain what this app does
             overlay = new PlainOverlay({ face: document.getElementById("message"), style: { cursor: "pointer" } });
             overlay.show();    
         });
