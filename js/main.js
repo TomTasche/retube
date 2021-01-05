@@ -1,26 +1,14 @@
 var initialized = false;
+var player;
+var overlay;
 
 function authenticate() {
-    var promise = new Promise((resolve, reject) => {
-        var authInstance = gapi.auth2.getAuthInstance();
-        authInstance.then(function () {
-            if (authInstance.isSignedIn.get()) {
-                resolve();
-            } else {
-                gapi.auth2.getAuthInstance().signIn({ scope: "https://www.googleapis.com/auth/youtube.readonly" }).then(resolve);
-            }
-        }, function (err) {
-            gapi.auth2.getAuthInstance().signIn({ scope: "https://www.googleapis.com/auth/youtube.readonly" }).then(resolve);
-        });
-    });
-
-    return promise;
+    return gapi.auth2.getAuthInstance().signIn({ scope: "https://www.googleapis.com/auth/youtube.readonly" });
 }
 function loadClient() {
     gapi.client.setApiKey("AIzaSyB-SZHmJ9eM9C5zF796D0sC9LJINBMgnHE");
     return gapi.client.load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
         .then(function () {
-            console.log("GAPI client loaded for API");
         }, function (err) {
             console.error("Error loading GAPI client for API", err);
         });
@@ -33,6 +21,8 @@ function execute() {
         "maxResults": 100,
         "mine": true
     }).then(function (response) {
+        console.log(response);
+
         var channels = response.result.items;
         // skip first (user's own channel)
         var randomChannel = channels[Math.floor(Math.random() * (channels.length - 1)) + 1];
@@ -64,6 +54,8 @@ function loadAllVideos(playlistId, pageToken, allVideos) {
         "maxResults": 50,
         "pageToken": pageToken
     }).then(function (response) {
+        console.log(response);
+
         allVideos = allVideos.concat(response.result.items);
 
         var nextPageToken = response.result.nextPageToken;
@@ -77,23 +69,54 @@ function loadAllVideos(playlistId, pageToken, allVideos) {
     }, function (err) { console.error("Execute error", err); });
 }
 
-gapi.load("client:auth2", function () {
-    gapi.auth2.init({ client_id: "349450720184-4f5jbjh4m1seootc5g5l8d24ns81rlb8.apps.googleusercontent.com" });
-});
+function startLoading() {
+    overlay.hide();
 
-var overlay = new PlainOverlay({ face: document.getElementById("message"), style: { cursor: "pointer" } });
-overlay.show();
+    overlay = new PlainOverlay();
+    overlay.show();
+
+    loadClient().then(execute);
+}
 
 document.addEventListener('click', function (event) {
     if (!initialized) {
         initialized = true;
-        overlay.hide();
-
-        overlay = new PlainOverlay();
-        overlay.show();
-
-        authenticate().then(loadClient).then(execute).then(function () {
-            overlay.hide();
-        });
+        
+        startLoading();
     }
 });
+
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.CUED) {
+        overlay.hide();
+    }
+}
+
+window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('player', {
+        events: {
+            'onStateChange': onPlayerStateChange
+        }
+    });
+
+    overlay = new PlainOverlay();
+    overlay.show();
+
+    gapi.load("client:auth2", function () {
+        gapi.auth2.init({ client_id: "349450720184-4f5jbjh4m1seootc5g5l8d24ns81rlb8.apps.googleusercontent.com" });
+
+        var authInstance = gapi.auth2.getAuthInstance();
+        authInstance.then(function () {
+            if (authInstance.isSignedIn.get()) {
+                overlay.hide();
+                
+                startLoading();
+            }
+        }, function (err) {
+            overlay.hide();
+
+            overlay = new PlainOverlay({ face: document.getElementById("message"), style: { cursor: "pointer" } });
+            overlay.show();    
+        });
+    });
+}
