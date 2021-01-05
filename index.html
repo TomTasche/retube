@@ -1,0 +1,49 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>ReTube</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+  <script src="js/vendor/modernizr-3.11.2.min.js"></script>
+  <script src="js/plugins.js"></script>
+
+  <!-- doesn't work for some reason: <script src="js/vendor/plain-overlay.min.js"></script>-->
+  <script src="https://anseki.github.io/plain-overlay/js/libs-ec5524c-190412221614.js"></script>
+
+  <script src="https://apis.google.com/js/api.js"></script>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <div class="video-container"><div id="player"></div></div>
+  <script>
+    var player;
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player');
+    }
+    </script>
+
+  <div id="message">Ready? Click here to start.</div>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>
